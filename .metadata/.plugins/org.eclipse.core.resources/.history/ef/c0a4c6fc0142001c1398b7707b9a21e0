@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="s-api-db-database-error-test-suite.xml" />
+	<munit:test name="s-api-db-database-error-test-suite-s-api-db-database-errorSub_FlowTest" doc:id="68c279fe-52e3-495d-a2e2-534929c167b5" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Input" doc:id="0e026318-1dc5-44f9-a283-8b247e3f62e5" />
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to s-api-db-database-errorSub_Flow" doc:id="51a90ed5-121f-4355-8f1e-b8f6fd96e196" name="s-api-db-database-errorSub_Flow"/>
+		</munit:execution>
+	</munit:test>
+
+
+</mule>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<flow name="usecaseFlow" doc:id="5c4d7fe4-22c8-4117-a552-f49e26848194" >
+		<file:listener doc:name="On New or Updated File" doc:id="0c3df129-e56c-4770-a070-b24e5416004c" config-ref="File_Config1" directory="C:\\Users\\vigneshbr\\Desktop\\Usecase\\InputData" autoDelete="true" outputMimeType="application/csv">
+			<scheduling-strategy >
+				<fixed-frequency />
+			</scheduling-strategy>
+		</file:listener>
+		<ee:transform doc:name="Transform Message" doc:id="30185a60-ba5b-460a-bbc0-edb29e13d759" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	OrderID: payload01.OrderID,
+	SKU: payload01.SKU,
+	Qty: payload01.Qty,
+	Price: payload01.Price,
+	CustomerID: payload01.CustomerID
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:bulk-insert doc:name="Bulk insert" doc:id="b5c43564-ba3d-4729-b21c-014d7497b07b" config-ref="Database_Config">
+			<db:bulk-input-parameters ><![CDATA[#[{"orderid":payload.OrderID,"SKU":payload.SKU,"Qty":payload.Qty,"CustomerID":payload.CustomerID,"Price":payload.Price}]]]></db:bulk-input-parameters>
+			<db:sql ><![CDATA[INSERT INTO usecase.input (orderid,Qty,SKU,Price,CustomerID) VAlUES (:orderid,:Qty,:SKU,:Price,:CustomerID);]]></db:sql>
+		</db:bulk-insert>
+		<logger level="INFO" doc:name="Logger" doc:id="451602f4-832a-4772-a981-66d7c3dc1b8a" message="#[payload]"/>
+	</flow>
+</mule>

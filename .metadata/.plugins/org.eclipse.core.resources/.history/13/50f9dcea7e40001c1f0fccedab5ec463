@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="Process-api" doc:id="731fa9f5-9feb-4856-a517-f5154706f614" >
+		<http:listener doc:name="Listener" doc:id="783b2d7f-d49a-43f7-973f-090035de4202" config-ref="HTTP_Listener_config" path="/process"/>
+		<logger level="INFO" doc:name="Start of the flow" doc:id="87f4098d-84ef-4f67-be13-9f360c217434" message='#["Start of the flow"]'/>
+		<http:request method="GET" doc:name="Request to Database System API" doc:id="775bf2b6-dd8d-430e-898a-82d43f624f4f" config-ref="HTTP_Request_configuration" path="/api/database"/>
+		<logger level="INFO" doc:name="Fetched Data from database" doc:id="56a6ddee-258e-46b3-9236-a364bfc7924b" message='#["Fetched Data successfully"]'/>
+	</flow>
+</mule>

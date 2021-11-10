@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd ">
+    <apikit:config name="salesforce-config" api="salesforce.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="salesforce-main">
+        <http:listener config-ref="HTTP_Listener_config" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="salesforce-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <set-variable value="#[vars.httpStatus]" doc:name="httpStatus" doc:id="b25fa4f8-82d7-4452-823b-7f07d84edc57" variableName="httpStatus"/>
+				<set-variable value="#[vars.httpDescription]" doc:name="httpDescription" doc:id="0931a46f-e57a-453a-9907-68f39e7acc4c" variableName="httpDescription"/>
+				<logger level="INFO" doc:name="DetailedDescription" doc:id="80acaad9-d496-4d92-b9fe-0e09d26ee3ef" message="#[error.detailedDescription]"/>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+				<set-variable value="#[vars.httpStatus]" doc:name="httpStatus" doc:id="bbbec422-e8bd-412a-8fbd-d864db679977" variableName="httpStatus" />
+				<set-variable value="#[vars.httpDescription]" doc:name="httpDescription" doc:id="f9aa70ff-27b4-4960-845f-94ccd2eddff9" variableName="httpDescription" />
+				<logger level="INFO" doc:name="DetailedDescription" doc:id="7768e108-6382-40a8-8280-6665a336c789" message="#[error.detailedDescription]" />
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+				<set-variable value="#[vars.httpStatus]" doc:name="httpStatus" doc:id="ef92cf1c-805a-4fc1-907d-58f3331a7ddf" variableName="httpStatus" />
+				<set-variable value="#[vars.httpDescription]" doc:name="httpDescription" doc:id="195679ae-c0ba-443b-8f38-8f70f3e91556" variableName="httpDescription" />
+				<logger level="INFO" doc:name="DetailedDescription" doc:id="b5b4c7d7-274d-4756-8f18-793812eae806" message="#[error.detailedDescription]" />
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+				<set-variable value="#[vars.httpStatus]" doc:name="httpStatus" doc:id="5bb80dae-f90d-4243-8a30-1533d4fa419d" variableName="httpStatus" />
+				<set-variable value="#[vars.httpDescription]" doc:name="Copy_of_httpDescription" doc:id="a6fff742-3ad3-4d40-944b-9b79cb61705c" variableName="httpDescription" />
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="post:\salesforce:text\csv:salesforce-config">
+		<flow-ref doc:name="Flow Reference" doc:id="2f0916f0-310a-4c39-bcae-6fbd19c04ddc" name="system-api-salesforceFlow"/>
+    </flow>
+</mule>

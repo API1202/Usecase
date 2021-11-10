@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<flow name="usecaseFlow" doc:id="b626b378-2f0b-4ddc-a246-d9c615ccfc44" >
+		<file:listener doc:id="5ddd85e2-a0ff-4747-8a98-face403d16ff" directory="C:\\Users\\vigneshbr\\Desktop\\Usecase\\InputData" autoDelete="true" config-ref="File_Config1">
+			<scheduling-strategy >
+				<fixed-frequency />
+			</scheduling-strategy>
+		</file:listener>
+		<ee:transform doc:name="Transform Message" doc:id="dcb3ff4e-6d66-4fb5-9084-ca16afdcd692" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:bulk-insert doc:id="a12f5808-1507-481e-b45a-e0a01c2af1fe" config-ref="Database_Config">
+			<db:bulk-input-parameters ><![CDATA[#[{"orderid": payload.OrderID, "SKU":payload.SKU, "Price":payload.Price, "Qty":payload.Qty,"CustomerID":payload.CustomerID}]]]></db:bulk-input-parameters>
+			<db:sql ><![CDATA[INSERT INTO usecase.inputdata VAlUES (:orderid,:SKU,:Price,:Qty,:CustomerID);]]></db:sql>
+		</db:bulk-insert>
+		<logger level="INFO" doc:name="Logger" doc:id="0bcfb559-8d8b-41bf-b7f5-619dbe7b39ee" message="#[payload]"/>
+	</flow>
+</mule>

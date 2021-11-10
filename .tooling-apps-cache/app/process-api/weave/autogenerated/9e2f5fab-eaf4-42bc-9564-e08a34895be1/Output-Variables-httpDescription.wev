@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_9e2f5fab_eaf4_42bc_9564_e08a34895be1_Output_Variables_httpDescription = String | Null
+

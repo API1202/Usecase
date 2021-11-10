@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="p-api-implementationFlow" doc:id="b55d15a5-f5db-495a-b797-db3401ad21c3" >
+		<logger level="INFO" doc:name='"Start of the process api"' doc:id="077f6d9c-e855-43bc-8bda-8e21abdc2e83" message='#["Start of the process api"]'/>
+		<http:request method="GET" doc:name="Request to database system API" doc:id="7268e753-b5b6-49c3-a654-331a5ab793d4" config-ref="HTTP_Request_configuration" path="${http-request.database-path}" responseTimeout="100000000"/>
+		<logger level="INFO" doc:name='"Fetched the data"' doc:id="615c3b43-7517-4578-8d41-3d84c55bed8a" message='#["Fetched the data"]'/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="2004ae4f-d393-4c40-a66e-9bd40aa21c95" >
+				<set-variable value="#[error.errorMessage.attributes.statusCode]" doc:name="Set Variable" doc:id="3bd864f5-19ab-4aad-843c-bf23ee29e5cd" variableName="httpStatus"/>
+				<set-variable value="#[error.muleMessage.typedValue]" doc:name="Set Variable" doc:id="93403402-d86d-4ee5-bc7c-2c2cd6a9cd6d" variableName="httpDescription"/>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <apikit:config name="process-api-config" api="process-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="process-api-main">
+        <http:listener config-ref="HTTP_Listener_config" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[vars.httpDescription]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="process-api-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+				<set-variable value="#[404]" doc:name="httpStatus" doc:id="97bc1f55-7ae1-436e-884a-2bff6133e6b7" variableName="httpStatus" />
+				<set-variable value="#[error.detailedDescription]" doc:name="httpDescription" doc:id="3016da92-f077-42b9-8573-a8d2b3b698af" variableName="httpDescription" />
+				<logger level="INFO" doc:name="Copy_of_Logger" doc:id="6c0b524d-e297-4129-8371-80d7c61da5f8" message="#[error.detailedDescription]" />
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+				<set-variable value="#[405]" doc:name="httpStatus" doc:id="719406f7-dead-4323-b8d3-361b6237cb2f" variableName="httpStatus" />
+				<set-variable value="#[error.detailedDescription]" doc:name="httpDescription" doc:id="4395f2fe-5fc2-47f8-811a-88783ac8a67c" variableName="httpDescription" />
+				<logger level="INFO" doc:name="Logger" doc:id="12bebfe4-0b75-48c9-9aa3-5bcc430cba17" message="#[error.detailedDescription]" />
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+				<set-variable value="#[406]" doc:name="httpStatus" doc:id="e95d099f-e004-472f-be49-3c10a35a5e2f" variableName="httpStatus" />
+				<set-variable value="#[error.detailedDescription]" doc:name="httpDescription" doc:id="1898116e-7159-430f-9b5b-9eb729e09337" variableName="httpDescription" />
+				<logger level="INFO" doc:name="Logger" doc:id="8ae916d2-3d7f-4ebb-9171-0fdba28a4b32" message="#[error.detailedDescription]" />
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+				<set-variable value="#[415]" doc:name="httpStatus" doc:id="7220c1f5-50d1-417d-922f-4c29da2abef2" variableName="httpStatus" />
+				<set-variable value="#[error.detailedDescription]" doc:name="httpDescription" doc:id="cdcafc0d-de68-4443-829c-dddce67a604c" variableName="httpDescription" />
+				<logger level="INFO" doc:name="Logger" doc:id="90b531f9-7761-4459-8f01-0dc3b1d98c5a" message="#[error.detailedDescription]"/>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <set-variable value="#[404]" doc:name="httpStatus" doc:id="9bc768d5-d89b-4c21-bb52-4b8c3b328054" variableName="httpStatus" />
+				<set-variable value="#[error.detailedDescription]" doc:name="httpDescription" doc:id="94237a49-29aa-40e2-8943-8e91a1097718" variableName="httpDescription" />
+				<logger level="ERROR" doc:name="Logger" doc:id="ac352140-ee0f-47bf-b4cc-3063ab08c13c" message="#[error.detailedDescription]" />
+            </on-error-propagate>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="1d81e918-d180-4edd-b465-9fc079a11897" type="ANY">
+				<set-variable value="#[error.errorMessage.attributes.statusCode]" doc:name="httpStatus" doc:id="8a1c9d11-8077-426e-9398-9ea45e2f56f0" variableName="httpStatus"/>
+				<set-variable value="#[error.muleMessage.typedValue]" doc:name="httpDescription" doc:id="4169378f-da40-4072-9073-33e08b1d36fc" variableName="httpDescription"/>
+				<logger level="ERROR" doc:name="Logger" doc:id="f6e1806b-0a7b-494a-9b40-b40a288eeec8" message="#[error.detailedDescription]"/>
+			</on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="get:\process:process-api-config">
+		<flow-ref doc:name="Flow Reference" doc:id="b3361d2d-ca36-4a9d-a586-7db163a58cb4" name="p-api-implementationFlow"/>
+    </flow>
+</mule>

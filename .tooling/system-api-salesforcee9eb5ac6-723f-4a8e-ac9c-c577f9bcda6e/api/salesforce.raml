@@ -1,0 +1,19 @@
+#%RAML 1.0
+title: salesforce
+
+/salesforce:
+  post:
+    body:
+      text/csv:
+        example: !include /example.raml
+    
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              output: "Done"
+          
+
+
+        

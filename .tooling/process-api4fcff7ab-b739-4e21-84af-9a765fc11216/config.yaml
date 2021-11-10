@@ -1,0 +1,8 @@
+http-request:
+  database-path: "/api/database"
+  database-port: "8081"
+  database-host: "localhost"
+  
+http:
+  port: "8085"
+  host: "localhost"
